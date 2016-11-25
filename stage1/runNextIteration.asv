@@ -89,7 +89,7 @@ for imageIdx = 15:numel(unclusteredImages)
             clusterImg = imresize(clusterImg, [h,h]);
             subplot(1,2,2);
             imshow(clusterImg);
-            % use siftflow or optical flow (or...?)
+            %can use siftflow or opt
             similarity(imgIdx) = mean(mean(mean(abs(RunSIFTFlow(rgb2gray(img),rgb2gray(clusterImg))))));
         end
         similarityMatrix(clusterIdx) = mean(similarity);
