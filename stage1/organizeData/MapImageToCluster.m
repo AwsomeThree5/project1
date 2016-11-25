@@ -2,6 +2,9 @@ function [  ] = MapImageToCluster(  )
 %MAPIMAGETOCLUSTER Summary of this function goes here
 %   Detailed explanation goes here
 vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
+fishType = 'NoF';
+projectName = 'project1';
+
 addpath(genpath(vl_rootnnPath))
 try
     warning off;
@@ -11,7 +14,6 @@ catch
     return;
 end
 dataFolder = fullfile(vl_rootnnPath, 'data\fish\train\train');
-fishType = 'ALB';
 dataFolder = [dataFolder, '\', fishType];
 if ~exist(dataFolder, 'dir')
     disp('fish data path should look like : ');
@@ -20,7 +22,9 @@ if ~exist(dataFolder, 'dir')
 end
 
 % include folders and subfolders of this project
-addpath(genpath(fileparts(fileparts(mfilename('fullpath')))))
+currentPath = mfilename('fullpath');
+gitPath = currentPath(1:strfind(currentPath, projectName)+numel(projectName)-1);
+addpath(genpath(gitPath))
 
 % find images names inside the data folder
 allImages = dir([dataFolder,  '\*.jpg']);
@@ -51,6 +55,7 @@ for clusterIdx = 1:numOfClusters
     clusteredImages.cluster(end+1:end+numel(clusterImages)) = num2cell(clusterIdx * ones(size(clusterImages,1),1));
 end
 
-save(fullfile(fileparts(mfilename('fullpath')), ['clusteredImages_',fishType, '.mat']), 
+save(fullfile(fileparts(mfilename('fullpath')),'organizeData', ['clusteredImages_',fishType, '.mat']), 'clusteredImages');
+
 end
 

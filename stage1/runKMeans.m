@@ -2,6 +2,8 @@
 % initialize paths
 vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
 fishType = 'ALB';
+projectName = 'project1';
+
 addpath(genpath(vl_rootnnPath))
 try
     warning off;
@@ -17,7 +19,9 @@ if ~exist(dataFolder, 'dir')
 end
 
 % include folders and subfolders of this project
-addpath(genpath(fileparts(fileparts(mfilename('fullpath')))))
+currentPath = mfilename('fullpath');
+gitPath = currentPath(1:strfind(currentPath, projectName)+numel(projectName)-1);
+addpath(genpath(gitPath))
 
 %lets start
 imageNames = dir([dataFolder,  '\*.jpg']);
