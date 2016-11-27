@@ -2,7 +2,7 @@ function [  ] = MapImageToCluster(  )
 %MAPIMAGETOCLUSTER Summary of this function goes here
 %   Detailed explanation goes here
 vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
-fishType = 'ALB';
+fishType = 'YFT';
 projectName = 'project1';
 
 addpath(genpath(vl_rootnnPath))
@@ -52,7 +52,7 @@ for clusterIdx = 1:numOfClusters
     clusterImages = {clusterImages.name}';
     counter = counter + numel(clusterImages);
     clusteredImages.name(end+1:end+numel(clusterImages)) = clusterImages;
-    clusteredImages.cluster(end+1:end+numel(clusterImages)) = num2cell(clusterIdx * ones(size(clusterImages,1),1));
+    clusteredImages.cluster(end+1:end+numel(clusterImages)) = num2cell(str2num(clusterNames{clusterIdx}) * ones(size(clusterImages,1),1));
 end
 
 save(fullfile(fileparts(mfilename('fullpath')), ['clusteredImages_',fishType, '.mat']), 'clusteredImages');
