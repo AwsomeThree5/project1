@@ -1,10 +1,9 @@
-function [  ] = MapImageToCluster(  )
-%MAPIMAGETOCLUSTER Summary of this function goes here
-%   Detailed explanation goes here
-vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
-fishType = 'ALB';
-projectName = 'project1';
 
+clear all
+clc
+vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
+fishType = 'YFT';
+projectName = 'project1';
 addpath(genpath(vl_rootnnPath))
 try
     warning off;
@@ -24,7 +23,12 @@ end
 % include folders and subfolders of this project
 currentPath = mfilename('fullpath');
 gitPath = currentPath(1:strfind(currentPath, projectName)+numel(projectName)-1);
-addpath(genpath(gitPath))
+addpath(genpath(gitPath));
+
+% include folders and subfolders of this project
+currentPath = mfilename('fullpath');
+gitPath = currentPath(1:strfind(currentPath, projectName)+numel(projectName)-1);
+addpath(genpath(gitPath));
 
 % find images names inside the data folder
 allImages = dir([dataFolder,  '\*.jpg']);
@@ -41,8 +45,7 @@ clusterNames = clusterNames(ind);
 
 %run through cluster folders, and generate a vector containing all
 %clustered images names
-clusteredImages.name =  cell(0,1);
-clusteredImages.cluster = cell(0,1);
+clusteredImages =  cell(0,1);
 counter = 0;
 numOfClusters = numel(clusterNames);
 for clusterIdx = 1:numOfClusters
@@ -51,11 +54,18 @@ for clusterIdx = 1:numOfClusters
     clusterImages = dir([clusterFolder, '\*.jpg']);
     clusterImages = {clusterImages.name}';
     counter = counter + numel(clusterImages);
-    clusteredImages.name(end+1:end+numel(clusterImages)) = clusterImages;
-    clusteredImages.cluster(end+1:end+numel(clusterImages)) = num2cell(clusterIdx * ones(size(clusterImages,1),1));
+    clusteredImages(end+1:end+numel(clusterImages)) = clusterImages;
 end
 
-save(fullfile(fileparts(mfilename('fullpath')), ['clusteredImages_',fishType, '.mat']), 'clusteredImages');
+% find which images are unclustered
+[imagePaths,~,uniqueNames] = unique([allImages ;clusteredImages]);
+[histCounts, ~] = hist(uniqueNames, numel(imagePaths));
+unclusteredImagesIndices = find(histCounts == 1);
+unclusteredImages = imagePaths(unclusteredImagesIndices);
 
+mkdir([dataFolder, '\unclustered'])
+for imgIdx = 1:numel(unclusteredImages)
+    disp(['writing image : ', num2str(imgIdx), '/', num2str(numel(unclusteredImages))]);
+    image = imread([dataFolder, '\', unclusteredImages{imgIdx}]);
+    imwrite(image, [dataFolder, '\unclustered\', unclusteredImages{imgIdx}]);
 end
-

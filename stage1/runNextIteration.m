@@ -71,7 +71,7 @@ disp([blanks(3),'Total : ', num2str(numel(unclusteredImagesIndices)+numel(cluste
 h = 200;
 images.path = cell(numel(unclusteredImages),1);
 warning off;
-for imageIdx = 15:numel(unclusteredImages)
+for imageIdx = 1:numel(unclusteredImages)
     disp(['image number : ', num2str(imageIdx), '/', num2str(numel(unclusteredImages))]);
     img = imread(fullfile(dataFolder, unclusteredImages{imageIdx}));
     img = imresize(img, [h,h]);
