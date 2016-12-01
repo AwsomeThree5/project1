@@ -98,7 +98,7 @@ set(1:numOfTrain) = 1;
 set(numOfTrain+1 : numel(data.set)) = 2;
 
 % remove mean in any dimension
-dataMean = mean(outData(:,:,:,find(set==1)), 4);
+dataMean = mean(outData(:,:,:,1:numOfTrain), 4);
 outData =  bsxfun(@minus, outData, dataMean);
 
 % verify that values are between 0 and 1

@@ -65,7 +65,7 @@ finalRatio = 0.57; % = mean(ratio)
 w = 100;
 h = floor(w*finalRatio);
 
-if 1
+if 0
     outData = single(zeros(h,w,3,N));
     for imageIdx = 1:N
         if round(imageIdx/100) == imageIdx/100
@@ -90,7 +90,7 @@ set(1:numOfTrain) = 1;
 set(numOfTrain+1 : numel(data.set)) = 2;
 
 % remove mean in any dimension
-dataMean = mean(outData(:,:,:,set), 4);
+dataMean = mean(outData(:,:,:,set==1), 4);
 outData =  bsxfun(@minus, outData, dataMean);
 
 % verify that values are between 0 and 1

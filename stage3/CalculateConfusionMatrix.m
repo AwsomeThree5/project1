@@ -7,7 +7,7 @@ projectName = 'project1';
 addpath(genpath(vl_rootnnPath))
 try
     warning off;
-    vl_setupnn();   
+    vl_setupnn();
 catch
     disp('you need to initialize the matconvnet path first');
     return;
@@ -32,18 +32,26 @@ net = load('net.mat');
 % get only the forward net
 net = net.net;
 % need to change the type from 'softmaxloss' to 'softmax'
-net.layers{11}.type = 'softmax';
+net.layers{end}.type = 'softmax';
 % load imdb
-imdb = load(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage2', 'imdb.mat'));
+imdb = load(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'imdb.mat'));
 valInd = find(imdb.images.set == 2);
 
-res = vl_simplenn(net, imdb.images.data(:,:,:,valInd));
-[certainty,  predictions] = max(res(end).x, [], 3);
-
-predictions = squeeze(squeeze(squeeze(predictions)));
+allPredictions = zeros(numel(valInd), 1);
+allCertainty = zeros(numel(valInd), 1);
+batchSize = 1;
+for batchIdx = 1:batchSize:numel(valInd)
+    disp(['batch index : ',num2str(batchIdx)]);
+    res = vl_simplenn(net, imdb.images.data(:,:,:,valInd(batchIdx)));
+    [certainty,  predictions] = max(res(end).x, [], 3);
+    allCertainty(batchIdx) = certainty;
+    allPredictions(batchIdx) = predictions;
+end
+allPredictions = squeeze(squeeze(squeeze(allPredictions)));
+allPredictions = allPredictions';
 groundTruth = imdb.images.labels(valInd);
 
-[confusionMat,order] = confusionmat(groundTruth,predictions);
+[confusionMat,order] = confusionmat(groundTruth,allPredictions);
 
 
 

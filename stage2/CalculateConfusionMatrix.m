@@ -32,7 +32,7 @@ net = load('net.mat');
 % get only the forward net
 net = net.net;
 % need to change the type from 'softmaxloss' to 'softmax'
-net.layers{11}.type = 'softmax';
+net.layers{end}.type = 'softmax';
 % load imdb
 imdb = load(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage2', 'imdb.mat'));
 valInd = find(imdb.images.set == 2);
