@@ -2,7 +2,7 @@ function [  ] = MapImageToCluster(  )
 %MAPIMAGETOCLUSTER Summary of this function goes here
 %   Detailed explanation goes here
 vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
-fishType = 'YFT';
+fishType = 'BET';
 projectName = 'project1';
 
 addpath(genpath(vl_rootnnPath))

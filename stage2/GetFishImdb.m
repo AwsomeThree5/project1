@@ -65,7 +65,7 @@ finalRatio = 0.57; % = mean(ratio)
 w = 100;
 h = floor(w*finalRatio);
 
-if 0
+if 1
     outData = single(zeros(h,w,3,N));
     for imageIdx = 1:N
         if round(imageIdx/100) == imageIdx/100

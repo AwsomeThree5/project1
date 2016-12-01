@@ -81,9 +81,9 @@ net.layers{end+1} = struct('type', 'softmaxloss') ;
 
 % Meta parameters
 net.meta.inputSize = [h w c] ;
-net.meta.trainOpts.learningRate = 0.2*[0.05*ones(1,2) 0.01*ones(1,28) 0.005*ones(1,10) 0.0005*ones(1,5)] ;
+net.meta.trainOpts.learningRate = 0.2*[0.05*ones(1,4) 0.01*ones(1,5) 0.003*ones(1,13)] ;
 net.meta.trainOpts.weightDecay = 0.0001 ;
-net.meta.trainOpts.batchSize = 100 ;
+net.meta.trainOpts.batchSize = 200 ; %100
 net.meta.trainOpts.numEpochs = numel(net.meta.trainOpts.learningRate) ;
 
 % Fill in default values
