@@ -82,6 +82,7 @@ data.fishType = data.fishType(indices);
 data.name = data.name(indices);
 data.label = data.label(indices);
 data.set= data.set(indices);
+data.camera= data.camera(indices);
 save(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'data.mat'), 'data', '-v7.3')
 
 

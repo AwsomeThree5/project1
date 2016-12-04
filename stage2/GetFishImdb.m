@@ -65,23 +65,25 @@ finalRatio = 0.57; % = mean(ratio)
 w = 100;
 h = floor(w*finalRatio);
 
-if 0
-    outData = single(zeros(h,w,3,N));
+if ~exist(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage2', 'outData.h5' ), 'file')
+    outData = zeros(h,w,3,N, 'single');
     for imageIdx = 1:N
         if round(imageIdx/100) == imageIdx/100
             disp(['image number : ',num2str(imageIdx)]);
         end
-        img = im2single(imread(imagePaths{imageIdx}));
+        img = single(imread(imagePaths{imageIdx}));
         % if grayscale
         if numel(size(img)) == 2
             img = cat(3, img, img, img);
         end
         outData(:,:,:,imageIdx) = imresize(img, [h, w]);
     end
-    save (fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage2', 'outData.mat' ), 'outData', '-v7.3');
+    h5create([vl_rootnnPath, '\data\fish-cnn-stage2\outData.h5'], ['/',vl_rootnnPath,'\data\fish-cnn-stage2'], size(outData),'Datatype', 'single');
+    h5write([vl_rootnnPath, '\data\fish-cnn-stage2\outData.h5'], ['/',vl_rootnnPath,'\data\fish-cnn-stage2'],outData);
+    clear outData
 end
 
-load(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage2', 'outData.mat' ));
+outData = h5read([vl_rootnnPath, '\data\fish-cnn-stage2\outData.h5'], ['/',vl_rootnnPath,'\data\fish-cnn-stage2']);
 labels = [data.label{:}];
 
 % find the train set indice
@@ -91,7 +93,8 @@ set(numOfTrain+1 : numel(data.set)) = 2;
 
 % remove mean in any dimension
 dataMean = mean(outData(:,:,:,set==1), 4);
-outData =  bsxfun(@minus, outData, dataMean);
+save dataMean dataMean
+% outData =  bsxfun(@minus, outData, dataMean);
 
 % verify that values are between 0 and 1
 if 0
@@ -110,7 +113,7 @@ imdb.meta.classes = num2cell(1:max(max([labels(:)])));
 imdb.meta.classes =imdb.meta.classes';
 imdb.images.labels = labels;
 imdb.images.set = set;
-imdb.images.data = outData;
+% imdb.images.data = outData;
 
 
 

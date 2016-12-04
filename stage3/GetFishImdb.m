@@ -1,4 +1,4 @@
-function [ imdb ] = GetFishImdb(  )
+    function [ imdb ] = GetFishImdb(  )
 %GETCARIMDB Summary of this function goes here
 % Preapre the imdb structure, returns image data with mean image subtracted
 
@@ -51,19 +51,19 @@ end
 w = 400;
 h = w;
 
-if ~exist(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'outData.mat' ), 'file')
+if ~exist(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'outData.h5' ), 'file')
     outData = zeros(h,w,3,N, 'single');
     for imageIdx = 1:N
         try
             if round(imageIdx/100) == imageIdx/100
                 disp(['image number : ',num2str(imageIdx)]);
             end
-            img = im2single(imread(imagePaths{imageIdx}));
+            img = single(imread(imagePaths{imageIdx}));
             % if grayscale
             if numel(size(img)) == 2
                 img = cat(3, img, img, img);
             end
-            cameraNumber = data.label{imageIdx};
+            cameraNumber = data.camera{imageIdx};
             cameraCentroid = boundingBoxCentroid(cameraNumber, :);
             xMin = max(cameraCentroid(1)-w/2, 1);
             xMax = min(cameraCentroid(1)+w/2, size(img, 2));
@@ -86,10 +86,12 @@ if ~exist(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'outData.mat' ), 'f
             disp('waittt');
         end
     end
-    save (fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'outData.mat' ), 'outData', '-v7.3');
+    h5create([vl_rootnnPath, '\data\fish-cnn-stage3\outData.h5'], ['/',vl_rootnnPath,'\data\fish-cnn-stage3'], size(outData),'Datatype', 'single');
+    h5write([vl_rootnnPath, '\data\fish-cnn-stage3\outData.h5'], ['/',vl_rootnnPath,'\data\fish-cnn-stage3'],outData);
+    clear outData
 end
 
-load(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'outData.mat' ));
+outData = h5read([vl_rootnnPath, '\data\fish-cnn-stage3\outData.h5'], ['/',vl_rootnnPath,'\data\fish-cnn-stage3']);
 labels = [data.label{:}];
 
 % find the train set indice
@@ -99,7 +101,8 @@ set(numOfTrain+1 : numel(data.set)) = 2;
 
 % remove mean in any dimension
 dataMean = mean(outData(:,:,:,1:numOfTrain), 4);
-outData =  bsxfun(@minus, outData, dataMean);
+save dataMean dataMean
+% outData =  bsxfun(@minus, outData, dataMean);
 
 % verify that values are between 0 and 1
 if 0
@@ -117,7 +120,8 @@ imdb.meta.sets = {'train', 'val'};
 imdb.meta.classes =unique(data.fishType);
 imdb.images.labels = labels;
 imdb.images.set = set;
-imdb.images.data = outData;
+% imdb.images.data = outData;
+imdb.images.name = data.name;
 
 
 

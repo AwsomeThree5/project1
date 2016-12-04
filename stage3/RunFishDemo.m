@@ -32,6 +32,7 @@ opts.expDir = fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3') ;
 
 opts.dataDir = fullfile(vl_rootnn, 'data','fish') ;
 opts.imdbPath = fullfile(opts.expDir, 'imdb.mat');
+opts.outDataPath = fullfile(opts.expDir, 'outData.h5');
 opts.whitenData = false ;
 opts.contrastNormalization = false ;
 opts.networkType = 'simplenn' ;
@@ -43,13 +44,21 @@ if ~isfield(opts.train, 'gpus'), opts.train.gpus = []; end;
 %                                                    Prepare model and data
 % -------------------------------------------------------------------------
 
+% h5create('C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3\outData.h5', ['/','C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3'], size(outData),'Datatype', 'single')
+% h5write('C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3\outData.h5', ['/','C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3'],outData)
+
+
 if exist(opts.imdbPath, 'file')
     imdb = load(opts.imdbPath) ;
-    imdb = imdb.imdb;
+    imdb.images.data = h5read(opts.outDataPath, ['/',opts.expDir]);
+    load('dataMean');
+%     imdb.images.data = bsxfun(@minus, outData, dataMean);
 else
     imdb = GetFishImdb() ;
     mkdir(opts.expDir) ;
     save(opts.imdbPath, '-struct', 'imdb', '-v7.3') ;
+    imdb.images.data = h5read(opts.outDataPath, ['/',opts.expDir]);
+    load('dataMean');
 end
 
 switch opts.modelType
