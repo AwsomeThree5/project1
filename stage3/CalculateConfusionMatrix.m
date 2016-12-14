@@ -1,4 +1,4 @@
-function [ confusionMat ] = CalculateConfusionMatrix( netPath )
+function [ confusionMat ] = CalculateConfusionMatrix( )
 % insert the path to the net.mat file and get the confusion matrix
 
 vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
@@ -28,31 +28,48 @@ addpath(genpath(gitPath))
 
 % lets start
 % netPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage2\net-epoch-13.mat';
-net = load('net.mat');
+net = load('fishNet.mat');
 % get only the forward net
 net = net.net;
 % need to change the type from 'softmaxloss' to 'softmax'
 net.layers{end}.type = 'softmax';
 % load imdb
+outData = h5read(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'outData.h5'), ['/', fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3')]);
 imdb = load(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'imdb.mat'));
 valInd = find(imdb.images.set == 2);
+% added the mean substruction per camera 
+dataMean = load('dataMean');
+dataMean = dataMean.dataMean;
 
-allPredictions = zeros(numel(valInd), 1);
-allCertainty = zeros(numel(valInd), 1);
+allCertainty = zeros(numel(valInd), 8);
 batchSize = 1;
 for batchIdx = 1:batchSize:numel(valInd)
-    disp(['batch index : ',num2str(batchIdx)]);
-    res = vl_simplenn(net, imdb.images.data(:,:,:,valInd(batchIdx)));
-    [certainty,  predictions] = max(res(end).x, [], 3);
-    allCertainty(batchIdx) = certainty;
-    allPredictions(batchIdx) = predictions;
+    disp(['batch index : ',num2str(batchIdx), '/', num2str(numel(valInd))]);
+    camera = imdb.images.camera{valInd(batchIdx)};
+    res = vl_simplenn(net, outData(:,:,:,valInd(batchIdx))-dataMean(:,:,:,camera));
+%     [certainty,  predictions] = max(res(end).x, [], 3);
+%     allCertainty(batchIdx) = certainty;
+%     allPredictions(batchIdx) = predictions;
+    allCertainty(batchIdx, :) = squeeze(squeeze(res(end).x));
 end
-allPredictions = squeeze(squeeze(squeeze(allPredictions)));
-allPredictions = allPredictions';
+[~, allPredictions] = max(allCertainty, [], 2);
 groundTruth = imdb.images.labels(valInd);
+groundTruth =groundTruth';
 
 [confusionMat,order] = confusionmat(groundTruth,allPredictions);
-
+for classInd = 1:8
+    counter = 0;
+    classImageIndices = find(imdb.images.labels(valInd) == classInd);
+    for imageIdx = 1:numel(classImageIndices)
+        if (imdb.images.labels(valInd(classImageIndices(imageIdx))) ~= allPredictions(classImageIndices(imageIdx)))
+            allCertainty(classImageIndices(imageIdx), :)
+            counter = counter + 1;
+            imshow(outData(:,:,:,valInd(classImageIndices(imageIdx)))/255);
+            title([num2str(allPredictions(classImageIndices(imageIdx))), '/', num2str(classInd), '   ', num2str(counter)]);
+            waitforbuttonpress();
+        end
+    end
+end
 
 
 

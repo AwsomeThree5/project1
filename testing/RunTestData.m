@@ -61,7 +61,7 @@ h2 = w2;
 testSoftmax = cell(numel(allImages),1);
 camPredictions = zeros(numel(allImages),1);
 
-if ~exist('testSoftmax.mat', 'file')
+if 1%~exist('testSoftmax.mat', 'file')
     for imageIdx = 1:1:numel(allImages)
         disp(['image number : ', num2str(imageIdx), '/', num2str(numel(allImages))]);
         img = single(imread(allImages{imageIdx}));

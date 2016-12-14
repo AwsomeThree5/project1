@@ -100,7 +100,13 @@ set(1:numOfTrain) = 1;
 set(numOfTrain+1 : numel(data.set)) = 2;
 
 % remove mean in any dimension
-dataMean = mean(outData(:,:,:,1:numOfTrain), 4);
+dataMean = zeros(h,w,3,max([data.camera{:}]));
+for cameraIdx = 1:max([data.camera{:}])
+    indices = find([data.camera{1:numOfTrain}] == cameraIdx);
+    disp(['camera : ',num2str(cameraIdx), '... numImages : ',num2str(numel(indices)), '/', num2str(numOfTrain)]);
+    dataMean(:,:,:,cameraIdx) = mean(outData(:,:,:,indices), 4);
+end
+% dataMean = mean(outData(:,:,:,1:numOfTrain), 4);
 save dataMean dataMean
 % outData =  bsxfun(@minus, outData, dataMean);
 
@@ -122,6 +128,7 @@ imdb.images.labels = labels;
 imdb.images.set = set;
 % imdb.images.data = outData;
 imdb.images.name = data.name;
+imdb.images.camera = data.camera;
 
 
 

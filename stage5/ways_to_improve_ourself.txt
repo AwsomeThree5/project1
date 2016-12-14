@@ -1,0 +1,19 @@
+there are several things we can do to improve our model:
+
+cross validation:
+right now, 80% of the training data is labeled as 'train', while 20% is labeled as 'test'
+if we cross validate, we can create a model that is based on the entire 100% of the training data
+
+ensamble:
+this is right for the last stage also. we can train different models to achieve a ~2% boost in accuracy
+
+data augmentation:
+the class distribution is awful. 1700/3700 images are from the class 'ALB', 750/3700 are from YFT
+we can use more than one crop with the less frequent classes - 
+	for example:, bigger crop and then resize... translations.. etc.
+	we can do so that the less the number of images per class, the more crops we take from each image.
+specifically we can crop irrelevant part of images and label them as 'NoFish' class.
+also - rotations!! we can rotate the crop in 8 directions. (mirror and not mirror + 90 deg each time)
+
+
+

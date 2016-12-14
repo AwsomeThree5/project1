@@ -47,11 +47,19 @@ if ~isfield(opts.train, 'gpus'), opts.train.gpus = []; end;
 % h5create('C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3\outData.h5', ['/','C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3'], size(outData),'Datatype', 'single')
 % h5write('C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3\outData.h5', ['/','C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23\data\fish-cnn-stage3'],outData)
 
-
+substructMean = 1;
 if exist(opts.imdbPath, 'file')
     imdb = load(opts.imdbPath) ;
     imdb.images.data = h5read(opts.outDataPath, ['/',opts.expDir]);
-    load('dataMean');
+    dataMean = load('dataMean');
+    dataMean = dataMean.dataMean;
+    if substructMean 
+        for cameraIdx = 1:max([imdb.images.camera{:}])
+            indices = find([imdb.images.camera{:}] == cameraIdx);
+            disp(['camera : ',num2str(cameraIdx), '... numImages : ',num2str(numel(indices)), '/', num2str(numel(imdb.images.camera))]);
+            imdb.images.data(:,:,:,indices) = bsxfun(@minus, imdb.images.data(:,:,:,indices), dataMean(:,:,:,cameraIdx));
+        end     
+    end
 %     imdb.images.data = bsxfun(@minus, outData, dataMean);
 else
     imdb = GetFishImdb() ;
@@ -100,7 +108,16 @@ end
 % -------------------------------------------------------------------------
 function [images, labels] = getSimpleNNBatch(imdb, batch)
 % -------------------------------------------------------------------------
-images = imdb.images.data(:,:,:,batch) ;
+images = imdb.images.data(:,:,:,batch);
+if rand > 0.5
+    images = permute(images, [2,1,3,4]);
+end
+if rand > 0.5
+    images = flipud(images);
+end
+if rand > 0.5
+    images = permute(images, [2,1,3,4]);
+end
 labels = imdb.images.labels(1,batch) ;
 if rand > 0.5, images=fliplr(images) ; end
 end
