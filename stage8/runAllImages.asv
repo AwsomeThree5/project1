@@ -1,0 +1,43 @@
+vl_rootnnPath = 'C:\Users\David\Desktop\matlab\matconvnet\matconvnet-1.0-beta23\matconvnet-1.0-beta23';
+desktopPath = 'C:\Users\David\Desktop';
+projectName = 'project1';
+
+addpath(genpath(vl_rootnnPath))
+try
+    warning off;
+    vl_setupnn();   
+catch
+    disp('you need to initialize the matconvnet path first');
+    return;
+end
+fishDataPath = 'C:\Users\David\Desktop\YesNoFish\NoFish\';
+realOutPath = 'C:\Users\David\Desktop\YesNoFish\RealNoFish\';
+noRealOutPath = 'C:\Users\David\Desktop\YesNoFish\NoRealNoFish\';
+mkdir(realOutPath);
+mkdir(noRealOutPath);
+% run on fish data end extract the camera number, based on 'data' struct
+dirStruct = dir([fishDataPath, '\*jpg']);
+imageNames = {dirStruct.name}';
+imageNames = cellfun(@(x) [fishDataPath,x], imageNames(:), 'UniformOutput', false);
+
+load('scores2.mat')
+for imageIdx = 1:numel(imageNames)
+    img = imshow(imread(imageNames{imageIdx}));
+    if (scores(imageIdx,1) > 0.5)
+       imwrite(img, fullfile(noRealOutPath, imageNames{imageIdx}));
+    else
+        imwrite(img, fullfile(noRealOutPath, imageNames{imageIdx}));
+    end
+end
+
+
+
+%   useGpu: 0
+%          numThreads: 12
+%           imageSize: [224 224]
+%            cropSize: 1
+%     subtractAverage: [3x1 double]
+
+
+
+    

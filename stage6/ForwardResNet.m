@@ -1,4 +1,4 @@
-function [ ] = ForwardVGG(  )
+function [ ] = ForwardResNet(  )
 %FORWARDVGG Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -35,26 +35,29 @@ end
 % load the data
 load(fullfile(vl_rootnnPath, 'data', 'fish-cnn-stage3', 'data.mat'));
 
-% load vgg-net
-net = load(fullfile(vl_rootnnPath, 'imagenet-vgg-verydeep-16.mat'));
+% load Res-Net 
+net = dagnn.DagNN.loadobj(load(fullfile(vl_rootnnPath, 'imagenet-resnet-50-dag.mat'))) ;
 
-meanImage = squeeze(net.meta.normalization.averageImage);
 fishClasses = [1,2,3,4,5,6,7,8,9,390,391,392,393,394,395,396,397];
-for imageIdx = 108:numel(data.name)
+for imageIdx = 1: numel(data.name)
     disp(['image number : ',num2str(imageIdx), '/', num2str(numel(data.name))]);
     %     tempImage = outData(:,:,:,imageIdx);
     tempImage = single(imread(fullfile(dataFolder, data.fishType{imageIdx}, data.name{imageIdx})));
-    tempImage(:,:,1) = tempImage(:,:,1) - meanImage(1);
-    tempImage(:,:,2) = tempImage(:,:,2) - meanImage(2);
-    tempImage(:,:,3) = tempImage(:,:,3) - meanImage(3);
-    tic;res = vl_simplenn(net, tempImage);toc
-    scores = res(end).x;
+    %resizing the image to hald the size in each dimension
+    tempImage = imresize(tempImage,0.5, 'bicubic');
+    resizedMeanImage = imresize(net.meta.normalization.averageImage, [size(tempImage,1), size(tempImage,2)]);
+    tempImage(:,:,1) = tempImage(:,:,1) - resizedMeanImage(:,:,1);
+    tempImage(:,:,2) = tempImage(:,:,2) - resizedMeanImage(:,:,1);
+    tempImage(:,:,3) = tempImage(:,:,3) - resizedMeanImage(:,:,1);
+    tic ;net.eval({'data', tempImage});toc
+    scores = squeeze(gather(net.vars(end).value));
     fishScoreMat = scores(:,:,fishClasses);
     fishScoreMat = sum(fishScoreMat, 3);
     scoreImage = uint8(fishScoreMat*255);
-    mkdir(fullfile(dataFolder,'scoreImages', data.fishType{imageIdx}));
+    scoreImage = imresize(scoreImage,2,'bicubic');
+    mkdir(fullfile(dataFolder,'scoreImages-ResNet_50', data.fishType{imageIdx}));
     imageName = strsplit(data.name{imageIdx}, '.');
-    imwrite(scoreImage,fullfile(dataFolder,'scoreImages', data.fishType{imageIdx}, [imageName{1},'.bmp']));
+    imwrite(scoreImage,fullfile(dataFolder,'scoreImages-ResNet_50', data.fishType{imageIdx}, [imageName{1},'.bmp']));
 end
 
 % h5create([vl_rootnnPath, '\data\fish-cnn-stage6\finalDataNormalized.h5'], ['/',vl_rootnnPath,'\data\fish-cnn-stage6'], size(finalData),'Datatype', 'single');
